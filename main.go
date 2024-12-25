@@ -11,7 +11,6 @@ import (
 	"github.com/axiaoxin-com/investool/cmds"
 	"github.com/axiaoxin-com/investool/models"
 	"github.com/axiaoxin-com/investool/version"
-	"github.com/axiaoxin-com/logging"
 	"github.com/spf13/viper"
 	"github.com/urfave/cli/v2"
 )
@@ -20,11 +19,11 @@ var (
 	// DefaultLoglevel 日志级别默认值
 	DefaultLoglevel = "info"
 	// ProcessorOptions 要启动运行的进程可选项
-	ProcessorOptions = []string{cmds.ProcessorChecker, cmds.ProcessorExportor, cmds.ProcessorWebserver}
+	ProcessorOptions = []string{cmds.ProcessorChecker, cmds.ProcessorExportor, cmds.ProcessorWebserver, cmds.ProcessorIndex, cmds.ProcessorJSON}
 )
 
 func init() {
-	viper.SetDefault("app.chan_size", 50)
+	viper.SetDefault("app.chan_size", 1)
 	models.InitGlobalVars()
 }
 
@@ -58,7 +57,7 @@ func main() {
 			Aliases:     []string{"l"},
 			Value:       DefaultLoglevel,
 			Usage:       "cmd 日志级别 [debug|info|warn|error]",
-			EnvVars:     []string{"XSTOCK_CMD_LOGLEVEL"},
+			EnvVars:     []string{"INVESTOOL_CMD_LOGLEVEL"},
 			DefaultText: DefaultLoglevel,
 		},
 	}
@@ -74,9 +73,11 @@ func main() {
 	app.Commands = append(app.Commands, cmds.CommandExportor())
 	app.Commands = append(app.Commands, cmds.CommandChecker())
 	app.Commands = append(app.Commands, cmds.CommandWebserver())
+	app.Commands = append(app.Commands, cmds.CommandIndex())
+	app.Commands = append(app.Commands, cmds.CommandJSON())
 
 	if err := app.Run(os.Args); err != nil {
-		logging.Fatal(nil, err.Error())
+		fmt.Println(err.Error())
 	}
 
 }

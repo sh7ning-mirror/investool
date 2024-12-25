@@ -33,12 +33,12 @@ $(document).ready(function () {
       if (unit == "元") {
         var yi = n / 100000000.0;
         if (Math.abs(yi) >= 1) {
-          result += yi.toFixed(2) + "亿元</br>";
+          result += yi.toFixed(2) + "亿元<br/>";
         } else if (n / 10000.0 >= 1) {
-          result += yi.toFixed(2) + "万元</br>";
+          result += yi.toFixed(2) + "万元<br/>";
         }
       } else {
-        result += n.toFixed(2) + unit + "</br>";
+        result += n.toFixed(2) + unit + "<br/>";
       }
     }
     return result;
@@ -50,8 +50,9 @@ $(document).ready(function () {
     $("#model_header").text($(this).text() + "中，请稍候...");
     $("#load_modal").modal()[0].M_Modal.options.dismissible = false;
     $("#load_modal").modal("open");
+    var url = $("#selector_submit_btn").attr("actionurl");
     $.ajax({
-      url: "/selector",
+      url: url,
       type: "post",
       data: $("#selector_form").serialize(),
       success: function (data) {
@@ -291,8 +292,9 @@ $(document).ready(function () {
     $("#model_header").text($(this).text() + "中，请稍候...");
     $("#load_modal").modal()[0].M_Modal.options.dismissible = false;
     $("#load_modal").modal("open");
+    var url = $("#checker_submit_btn").attr("actionurl");
     $.ajax({
-      url: "/checker",
+      url: url,
       type: "post",
       data: $("#checker_form").serialize(),
       success: function (data) {
@@ -312,16 +314,16 @@ $(document).ready(function () {
           $.each(data.Results, function (i, result) {
             var cm = data.StockNames[i].split("-")[1].split(".");
             $("#checker_results").append(
-              '</br><div class="divider"></div></br><div id="checker_result_' +
+              '<br/><div class="divider"></div><br/><div id="checker_result_' +
                 i +
                 '"><div class="row"><a target="_blank" href="http://quote.eastmoney.com/' +
                 cm[1] +
                 cm[0] +
                 '.html">' +
                 data.StockNames[i] +
-                "</a></br>当前检测财报数据来源:" +
+                "</a><br/>当前检测财报数据来源:" +
                 data.FinaReportNames[i] +
-                "</br>最新财报预约发布日期:" +
+                "<br/>最新财报预约发布日期:" +
                 data.FinaAppointPublishDates[i] +
                 "</div>" +
                 '<table class="centered striped">' +
@@ -352,23 +354,81 @@ $(document).ready(function () {
             );
             $(`#checker_result_${i}`).append(
               '<div class="row">' +
-                '</br><h5 class="center">年报数据趋势概览</h5>' +
-                '<div class="col s12 m12 l6">' +
-                '<svg id="line-chart-' +
-                i +
-                '-0"></svg>' +
-                "</div>" +
-                '<div class="col s12 m12 l6">' +
-                '<svg id="line-chart-' +
-                i +
-                '-1"></svg>' +
+                '<br><h5 class="center">年报数据趋势概览</h5>' +
+                '<div class="col s12">' +
+                '<div id="line-chart-' + i + '" style="width:100%;height:400px;"></div>' +
                 "</div>" +
                 "</div>"
             );
-            for (let j = 0; j < 2; j++) {
-              const svg = document.querySelector(`#line-chart-${i}-${j}`);
-              new chartXkcd.Line(svg, data.Lines[i][j]);
-            }
+            var lineChart = echarts.init(document.querySelector(`#line-chart-${i}`));
+            var option = {
+                tooltip: {
+                    trigger: 'axis',
+                    axisPointer: { type: 'cross' }
+                },
+                legend: {
+                    data: data.Lines[i].legends,
+                    top: 'bottom'
+                },
+                toolbox: {
+                    show: true,
+                    feature: {
+                        dataView: {},
+                        magicType: { type: ['bar'] },
+                        restore: {},
+                    }
+                },
+                xAxis: {
+                    data: data.Lines[i].xAxis
+                },
+                yAxis: {
+                    type: 'value'
+                },
+                series: [
+                    {
+                        name: "ROE",
+                        type: 'line',
+                        data: data.Lines[i].data[0]
+                    },
+                    {
+                        name: "EPS",
+                        type: 'line',
+                        data: data.Lines[i].data[1]
+                    },
+                    {
+                        name: "ROA",
+                        type: 'line',
+                        data: data.Lines[i].data[2]
+                    },
+                    {
+                        name: "毛利率",
+                        type: 'line',
+                        data: data.Lines[i].data[3]
+                    },
+                    {
+                        name: "净利率",
+                        type: 'line',
+                        data: data.Lines[i].data[4]
+                    },
+                    {
+                        name: "营收",
+                        type: 'line',
+                        data: data.Lines[i].data[5]
+                    },
+                    {
+                        name: "毛利润",
+                        type: 'line',
+                        data: data.Lines[i].data[6]
+                    },
+                    {
+                        name: "净利润",
+                        type: 'line',
+                        data: data.Lines[i].data[7]
+                    },
+                ]
+            };
+            lineChart.setOption(option);
+            window.onresize = function() { lineChart.resize(); };
           });
         }
         $("html, body").animate({ scrollTop: 0 }, 0);
@@ -469,8 +529,9 @@ $(document).ready(function () {
     $("#model_header").text($(this).text() + "中，请稍候...");
     $("#load_modal").modal()[0].M_Modal.options.dismissible = false;
     $("#load_modal").modal("open");
+    var url = $("#check_fund_submit_btn").attr("actionurl");
     $.ajax({
-      url: "/fund/check",
+      url: url,
       type: "post",
       data: $("#fundcheck_form").serialize(),
       success: function (data) {
@@ -629,9 +690,9 @@ $(document).ready(function () {
               fund.manager.id +
               '" target="_blank">' +
               fund.manager.name +
-              "</a></br>管理该基金:" +
+              "</a><br/>管理该基金:" +
               (fund.manager.manage_days / 365.0).toFixed(2) +
-              "年</br>任职回报:" +
+              "年<br/>任职回报:" +
               fund.manager.manage_repay.toFixed(2) +
               "%</td><td>" +
               manager +
@@ -639,11 +700,11 @@ $(document).ready(function () {
               data.Param.max_135_avg_stddev.toFixed(2) +
               "%</td><td>近1,3,5年波动率平均值:" +
               fund.stddev.avg_135.toFixed(2) +
-              "%</br>近1年波动率:" +
+              "%<br/>近1年波动率:" +
               fund.stddev.year_1.toFixed(2) +
-              "%</br>近3年波动率:" +
+              "%<br/>近3年波动率:" +
               fund.stddev.year_3.toFixed(2) +
-              "%</br>近5年波动率:" +
+              "%<br/>近5年波动率:" +
               fund.stddev.year_5.toFixed(2) +
               "%</td><td>" +
               stddev_avg135 +
@@ -651,11 +712,11 @@ $(document).ready(function () {
               data.Param.min_135_avg_sharp.toFixed(2) +
               "%</td><td>近1,3,5年夏普比率平均值:" +
               fund.sharp.avg_135.toFixed(2) +
-              "%</br>近1年夏普比率:" +
+              "%<br/>近1年夏普比率:" +
               fund.sharp.year_1.toFixed(2) +
-              "%</br>近3年夏普比率:" +
+              "%<br/>近3年夏普比率:" +
               fund.sharp.year_3.toFixed(2) +
-              "%</br>近5年夏普比率:" +
+              "%<br/>近5年夏普比率:" +
               fund.sharp.year_5.toFixed(2) +
               "%</td><td>" +
               sharp_avg135 +
@@ -663,11 +724,11 @@ $(document).ready(function () {
               data.Param.max_135_avg_stddev.toFixed(2) +
               "%</td><td>近1,3,5年最大回撤率平均值:" +
               fund.max_retracement.avg_135.toFixed(2) +
-              "%</br>近1年最大回撤率:" +
+              "%<br/>近1年最大回撤率:" +
               fund.max_retracement.year_1.toFixed(2) +
-              "%</br>近3年最大回撤率:" +
+              "%<br/>近3年最大回撤率:" +
               fund.max_retracement.year_3.toFixed(2) +
-              "%</br>近5年最大回撤率:" +
+              "%<br/>近5年最大回撤率:" +
               fund.max_retracement.year_5.toFixed(2) +
               "%</td><td>" +
               maxretr_avg135 +
@@ -677,7 +738,7 @@ $(document).ready(function () {
           if (data.StockCheckResults) {
             var stockCheckResult = data.StockCheckResults[fund.code];
             $(`#${fund.code}`).append(
-              '</br><h5 class="center">持仓股票检测结果</h5>'
+              '<br/><h5 class="center">持仓股票检测结果</h5>'
             );
             $.each(stockCheckResult.check_results, function (i, result) {
               var cm = stockCheckResult.names[i].split("-")[1].split(".");
@@ -694,14 +755,14 @@ $(document).ready(function () {
                   stockCheckResult.names[i] +
                   "</a> | 持仓占比:" +
                   fund.stocks[i].hold_ratio +
-                  "%</br>所属行业:" +
+                  "%<br/>所属行业:" +
                   fund.stocks[i].industry +
                   " | 最新调仓:" +
                   fund.stocks[i].adjust_ratio +
                   "%" +
-                  "</br>当前检测财报数据来源:" +
+                  "<br/>当前检测财报数据来源:" +
                   stockCheckResult.fina_report_names[i] +
-                  "</br>最新财报预约发布日期:" +
+                  "<br/>最新财报预约发布日期:" +
                   stockCheckResult.fina_appoint_publish_dates[i] +
                   "</div>" +
                   '<table class="centered striped">' +

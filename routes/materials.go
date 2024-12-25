@@ -4,9 +4,9 @@ package routes
 
 import (
 	"encoding/json"
-	"io/ioutil"
 	"net/http"
 
+	"github.com/axiaoxin-com/investool/statics"
 	"github.com/axiaoxin-com/investool/version"
 	"github.com/axiaoxin-com/logging"
 	"github.com/gin-gonic/gin"
@@ -21,41 +21,46 @@ type MaterialItem struct {
 }
 
 // MaterialSeries 某一个系列的资料
-// {
-//     "飙股在线等": [
-//         MaterialItem, ...
-//     ]
-// }
+//
+//	{
+//	    "飙股在线等": [
+//	        MaterialItem, ...
+//	    ]
+//	}
 type MaterialSeries map[string][]MaterialItem
 
 // TypedMaterialSeries 对MaterialSeries进行分类，如：视频、电子书等
-// {
-//     "videos": [
-//         MaterialSeries, ...
-//     ],
-//     "ebooks": [
-//         MaterialSeries, ...
-//     ]
-// }
+//
+//	{
+//	    "videos": [
+//	        MaterialSeries, ...
+//	    ],
+//	    "ebooks": [
+//	        MaterialSeries, ...
+//	    ]
+//	}
 type TypedMaterialSeries map[string][]MaterialSeries
 
 // AllMaterialsList 包含全部资料信息的大JSON列表
 // [
-//     TypedMaterialSeries, ...
+//
+//	TypedMaterialSeries, ...
+//
 // ]
 type AllMaterialsList []TypedMaterialSeries
 
 // MaterialsFilename 资料JSON文件路径
-var MaterialsFilename = "./materials.json"
+var MaterialsFilename = "materials"
 
 // Materials godoc
 func Materials(c *gin.Context) {
 	data := gin.H{
 		"Env":       viper.GetString("env"),
+		"HostURL":   viper.GetString("server.host_url"),
 		"Version":   version.Version,
 		"PageTitle": "InvesTool | 资料",
 	}
-	f, err := ioutil.ReadFile(MaterialsFilename)
+	f, err := statics.Files.ReadFile(MaterialsFilename)
 	if err != nil {
 		logging.Errorf(c, "Read MaterialsFilename:%v err:%v", MaterialsFilename, err)
 		data["Error"] = err

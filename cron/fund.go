@@ -21,7 +21,7 @@ func SyncFund() {
 		return
 	}
 	ctx := context.Background()
-	logging.Infof(ctx, "SyncFund request start...")
+	logging.Info(ctx, "SyncFund request start...")
 
 	// 获取全量列表
 	efundlist, err := datacenter.EastMoney.QueryAllFundList(ctx, eastmoney.FundTypeALL)
@@ -52,6 +52,12 @@ func SyncFund() {
 	}
 	models.FundTypeList = fundtypes
 
+	// 更新同步时间
+	models.SyncFundTime = time.Now()
+
+	// 更新4433列表
+	Update4433()
+
 	// 更新文件
 	b, err := json.Marshal(efundlist)
 	if err != nil {
@@ -77,12 +83,6 @@ func SyncFund() {
 		logging.Errorf(ctx, "SyncFund WriteFile fundtypelist error:%v", err)
 		promSyncError.WithLabelValues("SyncFund").Inc()
 	}
-
-	// 更新4433列表
-	Update4433()
-
-	// 更新同步时间
-	models.SyncFundTime = time.Now()
 }
 
 // Update4433 更新4433检测结果
